@@ -1,0 +1,15 @@
+{
+  "name": "Snake Quiz",
+  "short_name": "SnakeQuiz",
+  "start_url": "/SnakeQuiz/",
+  "display": "standalone",
+  "background_color": "#0b1726",
+  "theme_color": "#0ecb81",
+  "icons": [
+    {
+      "src": "/SnakeQuiz/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
