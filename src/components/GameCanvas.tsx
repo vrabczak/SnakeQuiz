@@ -12,6 +12,7 @@ interface GameCanvasProps {
 const GRID_WIDTH = 30;
 const GRID_HEIGHT = 30;
 const CELL_SIZE = 26;
+const LABEL_SIZE = 2;
 const STEP_MS = 170;
 
 const DIRECTION_MAP: Record<Direction, Point> = {
@@ -56,17 +57,37 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
 
   const createLabels = useCallback(
     (currentSnake: Point[]) => {
+      const BORDER_BUFFER = 2;
+      const minX = BORDER_BUFFER;
+      const maxX = GRID_WIDTH - BORDER_BUFFER - LABEL_SIZE;
+      const minY = BORDER_BUFFER;
+      const maxY = GRID_HEIGHT - BORDER_BUFFER - LABEL_SIZE;
       const taken = new Set(currentSnake.map((segment) => `${segment.x},${segment.y}`));
+      const areaIsFree = (position: Point) => {
+        for (let dx = 0; dx < LABEL_SIZE; dx += 1) {
+          for (let dy = 0; dy < LABEL_SIZE; dy += 1) {
+            if (taken.has(`${position.x + dx},${position.y + dy}`)) return false;
+          }
+        }
+        return true;
+      };
+      const markArea = (position: Point) => {
+        for (let dx = 0; dx < LABEL_SIZE; dx += 1) {
+          for (let dy = 0; dy < LABEL_SIZE; dy += 1) {
+            taken.add(`${position.x + dx},${position.y + dy}`);
+          }
+        }
+      };
       const options: Label[] = [];
       question.options.forEach((value) => {
         let position: Point;
         do {
           position = {
-            x: randomBetween(1, GRID_WIDTH - 2),
-            y: randomBetween(1, GRID_HEIGHT - 2)
+            x: randomBetween(minX, maxX),
+            y: randomBetween(minY, maxY)
           };
-        } while (taken.has(`${position.x},${position.y}`));
-        taken.add(`${position.x},${position.y}`);
+        } while (!areaIsFree(position));
+        markArea(position);
         options.push({ position, value });
       });
       return options;
@@ -182,7 +203,11 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
       }
 
       const labelIndex = labelsRef.current.findIndex(
-        (item) => item.position.x === newHead.x && item.position.y === newHead.y
+        (item) =>
+          newHead.x >= item.position.x &&
+          newHead.x < item.position.x + LABEL_SIZE &&
+          newHead.y >= item.position.y &&
+          newHead.y < item.position.y + LABEL_SIZE
       );
       const label = labelIndex >= 0 ? labelsRef.current[labelIndex] : undefined;
       const grow = label?.value === question.correct;
@@ -297,12 +322,13 @@ function drawSnake(ctx: CanvasRenderingContext2D, snake: Point[], viewport: View
 
 function drawLabels(ctx: CanvasRenderingContext2D, labels: Label[], viewport: Viewport) {
   const { cellSize, x, y, width, height } = viewport;
+  const labelPixelSize = cellSize * LABEL_SIZE;
   labels.forEach((label) => {
     const inView =
-      label.position.x >= x &&
       label.position.x < x + width &&
-      label.position.y >= y &&
-      label.position.y < y + height;
+      label.position.x + LABEL_SIZE > x &&
+      label.position.y < y + height &&
+      label.position.y + LABEL_SIZE > y;
 
     if (!inView) return;
 
@@ -310,13 +336,13 @@ function drawLabels(ctx: CanvasRenderingContext2D, labels: Label[], viewport: Vi
     const ly = (label.position.y - y) * cellSize;
     ctx.fillStyle = '#ffd166';
     ctx.beginPath();
-    ctx.roundRect(lx + 4, ly + 4, cellSize - 8, cellSize - 8, 6);
+    ctx.roundRect(lx + 4, ly + 4, labelPixelSize - 8, labelPixelSize - 8, Math.floor(labelPixelSize / 6));
     ctx.fill();
     ctx.fillStyle = '#16314f';
-    ctx.font = `${Math.floor(cellSize * 0.4)}px sans-serif`;
+    ctx.font = `${Math.floor(cellSize * 0.8)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(String(label.value), lx + cellSize / 2, ly + cellSize / 2);
+    ctx.fillText(String(label.value), lx + labelPixelSize / 2, ly + labelPixelSize / 2);
   });
 }
 
