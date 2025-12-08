@@ -9,8 +9,8 @@ interface GameCanvasProps {
   onGameOver: () => void;
 }
 
-const GRID_WIDTH = 60;
-const GRID_HEIGHT = 40;
+const GRID_WIDTH = 30;
+const GRID_HEIGHT = 30;
 const CELL_SIZE = 26;
 const STEP_MS = 170;
 
@@ -20,6 +20,14 @@ const DIRECTION_MAP: Record<Direction, Point> = {
   left: { x: -1, y: 0 },
   right: { x: 1, y: 0 }
 };
+
+function rotateDirection(current: Direction, turn: 'left' | 'right'): Direction {
+  const order: Direction[] = ['up', 'right', 'down', 'left'];
+  const step = turn === 'right' ? 1 : -1;
+  const index = order.indexOf(current);
+  const nextIndex = (index + step + order.length) % order.length;
+  return order[nextIndex];
+}
 
 interface Label {
   position: Point;
@@ -36,6 +44,8 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
   const [camera, setCamera] = useState({ width: GRID_WIDTH, height: GRID_HEIGHT });
   const touchStart = useRef<Point | null>(null);
   const lastTick = useRef(performance.now());
+  const snakeRef = useRef<Point[]>([]);
+  const labelsRef = useRef<Label[]>([]);
 
   const visibleArea = useMemo(() => ({
     width: Math.min(camera.width, GRID_WIDTH),
@@ -44,7 +54,7 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
 
   const head = snake[0];
 
-  const placeLabels = useCallback(
+  const createLabels = useCallback(
     (currentSnake: Point[]) => {
       const taken = new Set(currentSnake.map((segment) => `${segment.x},${segment.y}`));
       const options: Label[] = [];
@@ -59,14 +69,22 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
         taken.add(`${position.x},${position.y}`);
         options.push({ position, value });
       });
-      setLabels(options);
+      return options;
     },
     [question.options]
   );
 
   useEffect(() => {
-    placeLabels(snake);
-  }, [placeLabels, snake, question.prompt]);
+    snakeRef.current = snake;
+  }, [snake]);
+
+  useEffect(() => {
+    labelsRef.current = labels;
+  }, [labels]);
+
+  useEffect(() => {
+    setLabels(createLabels(snakeRef.current));
+  }, [createLabels]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -99,23 +117,34 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
     [direction]
   );
 
+  const queueTurn = useCallback((turn: 'left' | 'right') => {
+    setQueuedDirection((current) => rotateDirection(current, turn));
+  }, []);
+
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const map: Record<string, Direction> = {
-        ArrowUp: 'up',
-        ArrowDown: 'down',
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+      }
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      const turnMap: Record<string, 'left' | 'right'> = {
         ArrowLeft: 'left',
         ArrowRight: 'right'
       };
-      const mapped = map[event.key];
-      if (mapped) {
+      const turn = turnMap[event.key];
+      if (turn) {
         event.preventDefault();
-        handleDirectionChange(mapped);
+        queueTurn(turn);
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [handleDirectionChange]);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, [queueTurn]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
     touchStart.current = { x: event.clientX, y: event.clientY };
@@ -140,45 +169,60 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
       if (timestamp - lastTick.current < STEP_MS) return;
       lastTick.current = timestamp;
       setDirection(queuedDirection);
-      setSnake((current) => {
-        const movement = DIRECTION_MAP[queuedDirection];
-        const newHead = { x: current[0].x + movement.x, y: current[0].y + movement.y };
-        const hitsWall =
-          newHead.x <= 0 || newHead.y <= 0 || newHead.x >= GRID_WIDTH - 1 || newHead.y >= GRID_HEIGHT - 1;
-        const hitsBody = current.some((segment) => segment.x === newHead.x && segment.y === newHead.y);
-        if (hitsWall || hitsBody) {
-          onGameOver();
-          return current;
-        }
 
-        const label = labels.find((item) => item.position.x === newHead.x && item.position.y === newHead.y);
-        const grow = label?.value === question.correct;
-        if (label) {
-          if (grow) {
-            onCorrect();
-          } else {
-            onWrong();
-          }
+      const movement = DIRECTION_MAP[queuedDirection];
+      const currentSnake = snakeRef.current;
+      const newHead = { x: currentSnake[0].x + movement.x, y: currentSnake[0].y + movement.y };
+      const hitsWall =
+        newHead.x <= 0 || newHead.y <= 0 || newHead.x >= GRID_WIDTH - 1 || newHead.y >= GRID_HEIGHT - 1;
+      const hitsBody = currentSnake.some((segment) => segment.x === newHead.x && segment.y === newHead.y);
+      if (hitsWall || hitsBody) {
+        onGameOver();
+        return;
+      }
+
+      const labelIndex = labelsRef.current.findIndex(
+        (item) => item.position.x === newHead.x && item.position.y === newHead.y
+      );
+      const label = labelIndex >= 0 ? labelsRef.current[labelIndex] : undefined;
+      const grow = label?.value === question.correct;
+
+      if (labelIndex >= 0) {
+        setLabels((current) => current.filter((_, index) => index !== labelIndex));
+      }
+
+      const updatedSnake = [newHead, ...currentSnake];
+      if (!grow) {
+        updatedSnake.pop();
+      }
+      setSnake(updatedSnake);
+      snakeRef.current = updatedSnake;
+
+      if (label) {
+        if (grow) {
+          onCorrect();
+        } else {
+          onWrong();
         }
-        const nextSnake = [newHead, ...current];
-        if (!grow) {
-          nextSnake.pop();
-        }
-        placeLabels(nextSnake);
-        return nextSnake;
-      });
+      }
     },
-    [labels, onCorrect, onGameOver, onWrong, placeLabels, question.correct, queuedDirection, running]
+    [onCorrect, onGameOver, onWrong, queuedDirection, question.correct, running]
   );
 
+  const stepRef = useRef(step);
   useEffect(() => {
-    const loop = (timestamp: number) => {
-      step(timestamp);
-      requestAnimationFrame(loop);
-    };
-    const animation = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animation);
+    stepRef.current = step;
   }, [step]);
+
+  useEffect(() => {
+    let animationId: number;
+    const loop = (timestamp: number) => {
+      stepRef.current(timestamp);
+      animationId = requestAnimationFrame(loop);
+    };
+    animationId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationId);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -191,7 +235,6 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
       ctx.fillRect(0, 0, width, height);
 
       const viewport = computeViewport(head, visibleArea.width, visibleArea.height);
-      drawGrid(ctx, viewport);
       drawWalls(ctx, viewport);
       drawLabels(ctx, labels, viewport);
       drawSnake(ctx, snake, viewport);
@@ -208,37 +251,33 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
         onPointerMove={handlePointerMove}
         role="presentation"
       />
-      {!running && <div className="overlay">Tap Start to play</div>}
     </div>
   );
 }
 
-function drawGrid(ctx: CanvasRenderingContext2D, viewport: Viewport) {
-  const { cellSize, x, y, width, height } = viewport;
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  for (let i = 0; i <= width; i += 1) {
-    const offset = (i - x) * cellSize;
-    ctx.beginPath();
-    ctx.moveTo(offset, 0);
-    ctx.lineTo(offset, height * cellSize);
-    ctx.stroke();
-  }
-  for (let j = 0; j <= height; j += 1) {
-    const offset = (j - y) * cellSize;
-    ctx.beginPath();
-    ctx.moveTo(0, offset);
-    ctx.lineTo(width * cellSize, offset);
-    ctx.stroke();
-  }
-}
-
 function drawWalls(ctx: CanvasRenderingContext2D, viewport: Viewport) {
   const { cellSize, width, height } = viewport;
-  ctx.fillStyle = '#16314f';
-  ctx.fillRect(0, 0, width * cellSize, cellSize);
-  ctx.fillRect(0, (height - 1) * cellSize, width * cellSize, cellSize);
-  ctx.fillRect(0, 0, cellSize, height * cellSize);
-  ctx.fillRect((width - 1) * cellSize, 0, cellSize, height * cellSize);
+  const thickness = Math.min(cellSize, Math.floor(cellSize * 0.85));
+
+  ctx.save();
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(255,255,255,0.35)';
+  ctx.shadowBlur = Math.floor(thickness / 2);
+
+  // Only draw the segments of the border that are currently in view.
+  if (viewport.y === 0) {
+    ctx.fillRect(0, 0, width * cellSize, thickness);
+  }
+  if (viewport.y + height === GRID_HEIGHT) {
+    ctx.fillRect(0, height * cellSize - thickness, width * cellSize, thickness);
+  }
+  if (viewport.x === 0) {
+    ctx.fillRect(0, 0, thickness, height * cellSize);
+  }
+  if (viewport.x + width === GRID_WIDTH) {
+    ctx.fillRect(width * cellSize - thickness, 0, thickness, height * cellSize);
+  }
+  ctx.restore();
 }
 
 function drawSnake(ctx: CanvasRenderingContext2D, snake: Point[], viewport: Viewport) {
@@ -257,8 +296,16 @@ function drawSnake(ctx: CanvasRenderingContext2D, snake: Point[], viewport: View
 }
 
 function drawLabels(ctx: CanvasRenderingContext2D, labels: Label[], viewport: Viewport) {
-  const { cellSize, x, y } = viewport;
+  const { cellSize, x, y, width, height } = viewport;
   labels.forEach((label) => {
+    const inView =
+      label.position.x >= x &&
+      label.position.x < x + width &&
+      label.position.y >= y &&
+      label.position.y < y + height;
+
+    if (!inView) return;
+
     const lx = (label.position.x - x) * cellSize;
     const ly = (label.position.y - y) * cellSize;
     ctx.fillStyle = '#ffd166';

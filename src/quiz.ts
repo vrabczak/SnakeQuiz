@@ -1,8 +1,10 @@
 import { QuizQuestion } from './types';
 
 const MIN_FACTOR = 2;
-const MAX_FACTOR = 12;
+const MAX_FACTOR = 9;
 const OPTION_COUNT = 4;
+const MIN_PRODUCT = MIN_FACTOR * MIN_FACTOR;
+const MAX_PRODUCT = MAX_FACTOR * MAX_FACTOR;
 
 export function generateQuestion(): QuizQuestion {
   const a = randomBetween(MIN_FACTOR, MAX_FACTOR);
@@ -13,7 +15,7 @@ export function generateQuestion(): QuizQuestion {
   while (options.size < OPTION_COUNT) {
     const offset = randomBetween(-5, 5);
     const candidate = correct + offset * randomBetween(1, 3);
-    if (candidate > 0) {
+    if (candidate >= MIN_PRODUCT && candidate <= MAX_PRODUCT) {
       options.add(candidate);
     }
   }
