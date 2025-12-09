@@ -14,6 +14,9 @@ const GRID_HEIGHT = 30;
 const CELL_SIZE = 26;
 const LABEL_SIZE = 2;
 const STEP_MS = 170;
+const BOARD_BACKGROUND = '#0d1016';
+const BOARD_DARK = '#11151b';
+const BOARD_LIGHT = '#181d24';
 
 const DIRECTION_MAP: Record<Direction, Point> = {
   up: { x: 0, y: -1 },
@@ -256,10 +259,11 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
     if (!ctx) return;
     const render = () => {
       const { width, height } = canvas;
-      ctx.fillStyle = '#0b1726';
+      ctx.fillStyle = BOARD_BACKGROUND;
       ctx.fillRect(0, 0, width, height);
 
       const viewport = computeViewport(head, visibleArea.width, visibleArea.height);
+      drawBackground(ctx, viewport);
       drawWalls(ctx, viewport);
       drawLabels(ctx, labels, viewport);
       drawSnake(ctx, snake, viewport);
@@ -278,6 +282,19 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
       />
     </div>
   );
+}
+
+function drawBackground(ctx: CanvasRenderingContext2D, viewport: Viewport) {
+  const { cellSize, width, height, x, y } = viewport;
+  for (let cy = 0; cy < height; cy += 1) {
+    for (let cx = 0; cx < width; cx += 1) {
+      const worldX = x + cx;
+      const worldY = y + cy;
+      const useDark = (worldX + worldY) % 2 === 0;
+      ctx.fillStyle = useDark ? BOARD_DARK : BOARD_LIGHT;
+      ctx.fillRect(cx * cellSize, cy * cellSize, cellSize, cellSize);
+    }
+  }
 }
 
 function drawWalls(ctx: CanvasRenderingContext2D, viewport: Viewport) {
@@ -307,11 +324,15 @@ function drawWalls(ctx: CanvasRenderingContext2D, viewport: Viewport) {
 
 function drawSnake(ctx: CanvasRenderingContext2D, snake: Point[], viewport: Viewport) {
   const { cellSize, x, y } = viewport;
+  const outline = Math.max(1, Math.floor(cellSize * 0.1));
   snake.forEach((segment, index) => {
     const sx = (segment.x - x) * cellSize;
     const sy = (segment.y - y) * cellSize;
     ctx.fillStyle = index === 0 ? '#0ecb81' : '#1f9b76';
     ctx.fillRect(sx, sy, cellSize, cellSize);
+    ctx.lineWidth = outline;
+    ctx.strokeStyle = '#ffffff';
+    ctx.strokeRect(sx + outline / 2, sy + outline / 2, cellSize - outline, cellSize - outline);
     if (index === 0) {
       ctx.fillStyle = '#0b1726';
       ctx.fillRect(sx + cellSize * 0.6, sy + cellSize * 0.3, cellSize * 0.12, cellSize * 0.12);
