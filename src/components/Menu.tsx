@@ -8,6 +8,9 @@ interface MenuProps {
 }
 
 export default function Menu({ running, topic, topics, onStart, onReset, onTopicChange }: MenuProps) {
+  const primaryLabel = running ? 'Reset' : 'Start';
+  const primaryAction = running ? onReset : onStart;
+
   return (
     <aside className="menu">
       <header>
@@ -16,12 +19,13 @@ export default function Menu({ running, topic, topics, onStart, onReset, onTopic
       </header>
       <ul className="menu-list">
         <li>
-          <button className="primary" onClick={onStart} aria-label="Start or resume game">
-            {running ? 'Resume' : 'Start'}
+          <button
+            className="primary"
+            onClick={primaryAction}
+            aria-label={running ? 'Reset game' : 'Start game'}
+          >
+            {primaryLabel}
           </button>
-        </li>
-        <li>
-          <button onClick={onReset} aria-label="Reset game">Reset</button>
         </li>
         <li>
           <label className="menu-label" htmlFor="topic-select">Quiz topic</label>
