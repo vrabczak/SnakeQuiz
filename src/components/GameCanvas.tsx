@@ -31,7 +31,7 @@ interface GameCanvasProps {
  */
 export default function GameCanvas({ phase, stepMs, question, onCorrect, onWrong, onGameOver }: GameCanvasProps) {
   const { canvasRef, wrapperRef, visibleArea } = useCanvasViewport(CELL_SIZE, GRID_WIDTH, GRID_HEIGHT);
-  const { snake, labels, head, handleDirectionChange, queueTurn } = useSnakeController({
+  const { snake, labels, head, handleDirectionChange, handleImmediateDirectionChange, queueTurn } = useSnakeController({
     phase,
     stepMs,
     question,
@@ -40,7 +40,7 @@ export default function GameCanvas({ phase, stepMs, question, onCorrect, onWrong
     onGameOver
   });
   useKeyboardTurns(queueTurn);
-  const { handlePointerDown, handlePointerMove } = useSwipeControls(handleDirectionChange);
+  const { handlePointerDown, handlePointerMove } = useSwipeControls(handleImmediateDirectionChange);
 
   useEffect(() => {
     const canvas = canvasRef.current;
