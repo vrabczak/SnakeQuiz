@@ -6,24 +6,28 @@ const OPTION_COUNT = 4;
 const MIN_PRODUCT = MIN_FACTOR * MIN_FACTOR;
 const MAX_PRODUCT = MAX_FACTOR * MAX_FACTOR;
 
-export function generateQuestion(): QuizQuestion {
-  const a = randomBetween(MIN_FACTOR, MAX_FACTOR);
-  const b = randomBetween(MIN_FACTOR, MAX_FACTOR);
-  const correct = a * b;
-  const options = new Set<number>();
-  options.add(correct);
-  while (options.size < OPTION_COUNT) {
-    const offset = randomBetween(-5, 5);
-    const candidate = correct + offset * randomBetween(1, 3);
-    if (candidate >= MIN_PRODUCT && candidate <= MAX_PRODUCT) {
-      options.add(candidate);
+export function generateQuestion(previous?: QuizQuestion): QuizQuestion {
+  let next: QuizQuestion;
+  do {
+    const a = randomBetween(MIN_FACTOR, MAX_FACTOR);
+    const b = randomBetween(MIN_FACTOR, MAX_FACTOR);
+    const correct = a * b;
+    const options = new Set<number>();
+    options.add(correct);
+    while (options.size < OPTION_COUNT) {
+      const offset = randomBetween(-5, 5);
+      const candidate = correct + offset * randomBetween(1, 3);
+      if (candidate >= MIN_PRODUCT && candidate <= MAX_PRODUCT) {
+        options.add(candidate);
+      }
     }
-  }
-  return {
-    prompt: `${a} × ${b} = ?`,
-    correct,
-    options: shuffle([...options])
-  };
+    next = {
+      prompt: `${a} × ${b} = ?`,
+      correct,
+      options: shuffle([...options])
+    };
+  } while (previous && next.prompt === previous.prompt);
+  return next;
 }
 
 function randomBetween(min: number, max: number) {

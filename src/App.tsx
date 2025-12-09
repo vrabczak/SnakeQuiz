@@ -26,7 +26,7 @@ export default function App() {
 
   const onCorrect = () => {
     setScore((value) => value + 10);
-    setQuestion(generateQuestion());
+    setQuestion((previous) => generateQuestion(previous));
   };
 
   const onWrong = () => {
@@ -34,7 +34,7 @@ export default function App() {
   };
 
   const handleStart = () => {
-    setQuestion(generateQuestion());
+    setQuestion((previous) => generateQuestion(previous));
     setPhase('countdown');
     setCountdown(3);
     setResetKey((value) => value + 1);
@@ -42,7 +42,7 @@ export default function App() {
 
   const handleReset = () => {
     setScore(0);
-    setQuestion(generateQuestion());
+    setQuestion((previous) => generateQuestion(previous));
     setPhase('countdown');
     setCountdown(3);
     setResetKey((value) => value + 1);
