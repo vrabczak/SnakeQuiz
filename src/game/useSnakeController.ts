@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Direction, GamePhase, Point, QuizQuestion } from '../types';
-import { GRID_HEIGHT, GRID_WIDTH, LABEL_SIZE, STEP_MS } from './config';
+import { GRID_HEIGHT, GRID_WIDTH, LABEL_SIZE } from './config';
 import { DIRECTION_MAP, initialSnake, rotateDirection } from './movement';
 import { Label } from './types';
 import { randomBetween } from './utils';
@@ -8,6 +8,7 @@ import { randomBetween } from './utils';
 /** External event handlers and state needed to control the snake game loop. */
 interface UseSnakeControllerProps {
   phase: GamePhase;
+  stepMs: number;
   question: QuizQuestion;
   onCorrect: () => void;
   onWrong: () => void;
@@ -17,7 +18,14 @@ interface UseSnakeControllerProps {
 const BORDER_BUFFER = 2;
 
 /** Manage snake movement, growth/shrink, and label spawning. */
-export function useSnakeController({ phase, question, onCorrect, onWrong, onGameOver }: UseSnakeControllerProps) {
+export function useSnakeController({
+  phase,
+  stepMs,
+  question,
+  onCorrect,
+  onWrong,
+  onGameOver
+}: UseSnakeControllerProps) {
   const [snake, setSnake] = useState<Point[]>([]);
   const [, setDirection] = useState<Direction>('right');
   const [labels, setLabels] = useState<Label[]>([]);
@@ -154,7 +162,7 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
   const step = useCallback(
     (timestamp: number) => {
       if (phase !== 'playing') return;
-      if (timestamp - lastTick.current < STEP_MS) return;
+      if (timestamp - lastTick.current < stepMs) return;
       lastTick.current = timestamp;
       const queued = directionQueue.current.shift();
       const nextDirection = queued ?? directionRef.current;
@@ -208,7 +216,7 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
         }
       }
     },
-    [onCorrect, onGameOver, onWrong, question.correct, phase]
+    [onCorrect, onGameOver, onWrong, question.correct, phase, stepMs]
   );
 
   const stepRef = useRef(step);

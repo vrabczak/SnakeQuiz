@@ -7,9 +7,12 @@ interface MenuProps {
   running: boolean;
   topic: string;
   topics: string[];
+  speed: number;
+  speeds: { label: string; value: number }[];
   onStart: () => void;
   onReset: () => void;
   onTopicChange: (topic: string) => void;
+  onSpeedChange: (speed: number) => void;
   isMobile: boolean;
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -20,9 +23,12 @@ interface MenuProps {
  * @param props.running Whether the game is currently active.
  * @param props.topic Current quiz topic value.
  * @param props.topics All available quiz topics.
+ * @param props.speed Milliseconds per snake step.
+ * @param props.speeds All available speed choices.
  * @param props.onStart Handler to begin a new game.
  * @param props.onReset Handler to reset the existing game.
  * @param props.onTopicChange Handler to update the selected topic.
+ * @param props.onSpeedChange Handler to update the snake speed.
  * @param props.isMobile Whether the layout is in mobile mode.
  * @param props.collapsed Whether the menu is collapsed on mobile.
  * @param props.onToggleCollapse Handler to expand or collapse the menu on mobile.
@@ -32,9 +38,12 @@ export default function Menu({
   running,
   topic,
   topics,
+  speed,
+  speeds,
   onStart,
   onReset,
   onTopicChange,
+  onSpeedChange,
   isMobile,
   collapsed,
   onToggleCollapse
@@ -102,6 +111,21 @@ export default function Menu({
               {topics.map((item) => (
                 <option key={item} value={item}>
                   {item}
+                </option>
+              ))}
+            </select>
+          </li>
+          <li>
+            <label className="menu-label" htmlFor="speed-select">Snake speed</label>
+            <select
+              id="speed-select"
+              value={String(speed)}
+              onChange={(event) => onSpeedChange(Number(event.target.value))}
+              aria-label="Select snake speed"
+            >
+              {speeds.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
