@@ -4,8 +4,16 @@ import Menu from './components/Menu';
 import StatusBar from './components/StatusBar';
 import { GamePhase, QuizQuestion } from './types';
 import { generateQuestion } from './quiz';
+import { STEP_MS } from './game/config';
 
 const QUIZ_TOPICS = ['Multiplication'];
+const SPEED_OPTIONS = [
+  { label: 'Very slow', value: 280 },
+  { label: 'Slow', value: 230 },
+  { label: 'Normal', value: STEP_MS },
+  { label: 'Fast', value: 120 },
+  { label: 'Very fast', value: 90 }
+];
 const MOBILE_BREAKPOINT = 960;
 
 /**
@@ -17,6 +25,7 @@ export default function App() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [topic, setTopic] = useState(QUIZ_TOPICS[0]);
+  const [speedMs, setSpeedMs] = useState(SPEED_OPTIONS[1].value);
   const [question, setQuestion] = useState<QuizQuestion>(() => generateQuestion());
   const [resetKey, setResetKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -100,9 +109,12 @@ export default function App() {
         running={isActive}
         topic={topic}
         topics={QUIZ_TOPICS}
+        speed={speedMs}
+        speeds={SPEED_OPTIONS}
         onStart={handleStart}
         onReset={handleReset}
         onTopicChange={setTopic}
+        onSpeedChange={setSpeedMs}
         isMobile={isMobile}
         collapsed={isMenuCollapsed}
         onToggleCollapse={toggleMenu}
@@ -112,6 +124,7 @@ export default function App() {
         <GameCanvas
           key={resetKey}
           phase={phase}
+          stepMs={speedMs}
           question={question}
           onCorrect={onCorrect}
           onWrong={onWrong}

@@ -12,6 +12,7 @@ import { useSwipeControls } from '../game/useSwipeControls';
  */
 interface GameCanvasProps {
   phase: GamePhase;
+  stepMs: number;
   question: QuizQuestion;
   onCorrect: () => void;
   onWrong: () => void;
@@ -21,16 +22,18 @@ interface GameCanvasProps {
 /**
  * Canvas wrapper responsible for rendering the game and wiring input handlers.
  * @param props.phase Current lifecycle phase of the game.
+ * @param props.stepMs Milliseconds per snake move tick.
  * @param props.question Active quiz prompt driving the board labels.
  * @param props.onCorrect Callback when the player eats the correct answer.
  * @param props.onWrong Callback when the player collides with an incorrect label.
  * @param props.onGameOver Callback when the snake dies.
  * @returns Game canvas with keyboard and touch controls bound.
  */
-export default function GameCanvas({ phase, question, onCorrect, onWrong, onGameOver }: GameCanvasProps) {
+export default function GameCanvas({ phase, stepMs, question, onCorrect, onWrong, onGameOver }: GameCanvasProps) {
   const { canvasRef, wrapperRef, visibleArea } = useCanvasViewport(CELL_SIZE, GRID_WIDTH, GRID_HEIGHT);
   const { snake, labels, head, handleDirectionChange, queueTurn } = useSnakeController({
     phase,
+    stepMs,
     question,
     onCorrect,
     onWrong,
