@@ -16,6 +16,7 @@ interface UseSnakeControllerProps {
 }
 
 const BORDER_BUFFER = 2;
+const MAX_TURN_QUEUE = 2;
 
 /** Manage snake movement, growth/shrink, and label spawning. */
 export function useSnakeController({
@@ -140,6 +141,9 @@ export function useSnakeController({
     };
     const plannedDirection = getPlannedDirection();
     if (opposite[next] === plannedDirection) return;
+    if (directionQueue.current.length >= MAX_TURN_QUEUE) {
+      directionQueue.current.shift();
+    }
     directionQueue.current.push(next);
   }, [getPlannedDirection]);
 
@@ -157,6 +161,22 @@ export function useSnakeController({
       enqueueDirection(nextDirection);
     },
     [enqueueDirection, getPlannedDirection]
+  );
+
+  const handleImmediateDirectionChange = useCallback(
+    (next: Direction) => {
+      const opposite: Record<Direction, Direction> = {
+        up: 'down',
+        down: 'up',
+        left: 'right',
+        right: 'left'
+      };
+      if (opposite[next] === directionRef.current) return;
+      directionQueue.current = [];
+      directionRef.current = next;
+      setDirection(next);
+    },
+    []
   );
 
   const step = useCallback(
@@ -234,5 +254,5 @@ export function useSnakeController({
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  return { snake, labels, head, handleDirectionChange, queueTurn };
+  return { snake, labels, head, handleDirectionChange, handleImmediateDirectionChange, queueTurn };
 }
