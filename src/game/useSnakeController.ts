@@ -19,12 +19,13 @@ const BORDER_BUFFER = 2;
 /** Manage snake movement, growth/shrink, and label spawning. */
 export function useSnakeController({ phase, question, onCorrect, onWrong, onGameOver }: UseSnakeControllerProps) {
   const [snake, setSnake] = useState<Point[]>([]);
-  const [direction, setDirection] = useState<Direction>('right');
-  const [queuedDirection, setQueuedDirection] = useState<Direction>('right');
+  const [, setDirection] = useState<Direction>('right');
   const [labels, setLabels] = useState<Label[]>([]);
   const lastTick = useRef(performance.now());
   const snakeRef = useRef<Point[]>([]);
   const labelsRef = useRef<Label[]>([]);
+  const directionRef = useRef<Direction>('right');
+  const directionQueue = useRef<Direction[]>([]); // future turns to apply one-per-tick
 
   const head = useMemo(
     () => snake[0] ?? { x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) },
@@ -88,7 +89,8 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
       snakeRef.current = [];
       labelsRef.current = [];
       setDirection('right');
-      setQueuedDirection('right');
+      directionRef.current = 'right';
+      directionQueue.current = [];
     }
   }, [phase]);
 
@@ -97,7 +99,8 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
     if (snakeRef.current.length) return;
     const startingDirection: Direction = 'right';
     setDirection(startingDirection);
-    setQueuedDirection(startingDirection);
+    directionRef.current = startingDirection;
+    directionQueue.current = [];
     lastTick.current = performance.now();
     const newSnake = initialSnake();
     setSnake(newSnake);
@@ -115,32 +118,50 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
     labelsRef.current = newLabels;
   }, [phase, createLabels, question]);
 
+  const getPlannedDirection = useCallback(() => {
+    const queue = directionQueue.current;
+    return queue.length ? queue[queue.length - 1] : directionRef.current;
+  }, []);
+
+  const enqueueDirection = useCallback((next: Direction) => {
+    const opposite: Record<Direction, Direction> = {
+      up: 'down',
+      down: 'up',
+      left: 'right',
+      right: 'left'
+    };
+    const plannedDirection = getPlannedDirection();
+    if (opposite[next] === plannedDirection) return;
+    directionQueue.current.push(next);
+  }, [getPlannedDirection]);
+
   const handleDirectionChange = useCallback(
     (next: Direction) => {
-      const opposite: Record<Direction, Direction> = {
-        up: 'down',
-        down: 'up',
-        left: 'right',
-        right: 'left'
-      };
-      if (opposite[next] === direction) return;
-      setQueuedDirection(next);
+      enqueueDirection(next);
     },
-    [direction]
+    [enqueueDirection]
   );
 
-  const queueTurn = useCallback((turn: 'left' | 'right') => {
-    setQueuedDirection((current) => rotateDirection(current, turn));
-  }, []);
+  const queueTurn = useCallback(
+    (turn: 'left' | 'right') => {
+      const plannedDirection = getPlannedDirection();
+      const nextDirection = rotateDirection(plannedDirection, turn);
+      enqueueDirection(nextDirection);
+    },
+    [enqueueDirection, getPlannedDirection]
+  );
 
   const step = useCallback(
     (timestamp: number) => {
       if (phase !== 'playing') return;
       if (timestamp - lastTick.current < STEP_MS) return;
       lastTick.current = timestamp;
-      setDirection(queuedDirection);
+      const queued = directionQueue.current.shift();
+      const nextDirection = queued ?? directionRef.current;
+      directionRef.current = nextDirection;
+      setDirection(nextDirection);
 
-      const movement = DIRECTION_MAP[queuedDirection];
+      const movement = DIRECTION_MAP[nextDirection];
       const currentSnake = snakeRef.current;
       if (currentSnake.length === 0) return;
       const newHead = { x: currentSnake[0].x + movement.x, y: currentSnake[0].y + movement.y };
@@ -187,7 +208,7 @@ export function useSnakeController({ phase, question, onCorrect, onWrong, onGame
         }
       }
     },
-    [onCorrect, onGameOver, onWrong, queuedDirection, question.correct, phase]
+    [onCorrect, onGameOver, onWrong, question.correct, phase]
   );
 
   const stepRef = useRef(step);
