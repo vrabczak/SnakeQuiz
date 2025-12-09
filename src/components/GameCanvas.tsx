@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Direction, Point, QuizQuestion } from '../types';
+import { Direction, GamePhase, Point, QuizQuestion } from '../types';
 
 interface GameCanvasProps {
-  running: boolean;
+  phase: GamePhase;
   question: QuizQuestion;
   onCorrect: () => void;
   onWrong: () => void;
@@ -38,10 +38,10 @@ interface Label {
   value: number;
 }
 
-export default function GameCanvas({ running, question, onCorrect, onWrong, onGameOver }: GameCanvasProps) {
+export default function GameCanvas({ phase, question, onCorrect, onWrong, onGameOver }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [snake, setSnake] = useState<Point[]>(() => initialSnake());
+  const [snake, setSnake] = useState<Point[]>([]);
   const [direction, setDirection] = useState<Direction>('right');
   const [queuedDirection, setQueuedDirection] = useState<Direction>('right');
   const [labels, setLabels] = useState<Label[]>([]);
@@ -56,7 +56,7 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
     height: Math.min(camera.height, GRID_HEIGHT)
   }), [camera.height, camera.width]);
 
-  const head = snake[0];
+  const head = snake[0] ?? { x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) };
 
   const createLabels = useCallback(
     (currentSnake: Point[]) => {
@@ -107,8 +107,36 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
   }, [labels]);
 
   useEffect(() => {
-    setLabels(createLabels(snakeRef.current));
-  }, [createLabels]);
+    if (phase === 'countdown' || phase === 'idle') {
+      setSnake([]);
+      setLabels([]);
+      snakeRef.current = [];
+      labelsRef.current = [];
+      setDirection('right');
+      setQueuedDirection('right');
+      return;
+    }
+    if (phase === 'playing') {
+      const startingDirection: Direction = 'right';
+      setDirection(startingDirection);
+      setQueuedDirection(startingDirection);
+      lastTick.current = performance.now();
+      const newSnake = initialSnake();
+      setSnake(newSnake);
+      snakeRef.current = newSnake;
+      const newLabels = createLabels(newSnake);
+      setLabels(newLabels);
+      labelsRef.current = newLabels;
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    if (!snakeRef.current.length) return;
+    const newLabels = createLabels(snakeRef.current);
+    setLabels(newLabels);
+    labelsRef.current = newLabels;
+  }, [phase, createLabels, question]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -189,13 +217,14 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
 
   const step = useCallback(
     (timestamp: number) => {
-      if (!running) return;
+      if (phase !== 'playing') return;
       if (timestamp - lastTick.current < STEP_MS) return;
       lastTick.current = timestamp;
       setDirection(queuedDirection);
 
       const movement = DIRECTION_MAP[queuedDirection];
       const currentSnake = snakeRef.current;
+      if (currentSnake.length === 0) return;
       const newHead = { x: currentSnake[0].x + movement.x, y: currentSnake[0].y + movement.y };
       const hitsWall =
         newHead.x <= 0 || newHead.y <= 0 || newHead.x >= GRID_WIDTH - 1 || newHead.y >= GRID_HEIGHT - 1;
@@ -234,7 +263,7 @@ export default function GameCanvas({ running, question, onCorrect, onWrong, onGa
         }
       }
     },
-    [onCorrect, onGameOver, onWrong, queuedDirection, question.correct, running]
+    [onCorrect, onGameOver, onWrong, queuedDirection, question.correct, phase]
   );
 
   const stepRef = useRef(step);

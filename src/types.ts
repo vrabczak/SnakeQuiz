@@ -10,3 +10,5 @@ export interface QuizQuestion {
   correct: number;
   options: number[];
 }
+
+export type GamePhase = 'idle' | 'countdown' | 'playing' | 'over';

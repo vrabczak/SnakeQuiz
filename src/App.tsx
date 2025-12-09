@@ -2,20 +2,23 @@ import { useEffect, useState } from 'react';
 import GameCanvas from './components/GameCanvas';
 import Menu from './components/Menu';
 import StatusBar from './components/StatusBar';
-import { QuizQuestion } from './types';
+import { GamePhase, QuizQuestion } from './types';
 import { generateQuestion } from './quiz';
 
 const QUIZ_TOPICS = ['Multiplication'];
 const MOBILE_BREAKPOINT = 960;
 
 export default function App() {
-  const [running, setRunning] = useState(false);
+  const [phase, setPhase] = useState<GamePhase>('idle');
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [topic, setTopic] = useState(QUIZ_TOPICS[0]);
   const [question, setQuestion] = useState<QuizQuestion>(() => generateQuestion());
   const [resetKey, setResetKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(true);
+  const isActive = phase === 'playing' || phase === 'countdown';
+  const isPlaying = phase === 'playing';
 
   const onCorrect = () => {
     setScore((value) => value + 10);
@@ -27,13 +30,17 @@ export default function App() {
   };
 
   const handleStart = () => {
-    setRunning(true);
+    setQuestion(generateQuestion());
+    setPhase('countdown');
+    setCountdown(3);
     setResetKey((value) => value + 1);
   };
 
   const handleReset = () => {
     setScore(0);
     setQuestion(generateQuestion());
+    setPhase('countdown');
+    setCountdown(3);
     setResetKey((value) => value + 1);
     if (isMobile) {
       setMenuOpen(false);
@@ -41,7 +48,8 @@ export default function App() {
   };
 
   const handleGameOver = () => {
-    setRunning(false);
+    setPhase('over');
+    setCountdown(null);
     alert('GAME OVER');
   };
 
@@ -53,26 +61,39 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!running) {
+    if (!isActive) {
       setMenuOpen(true);
       return;
     }
     if (isMobile) {
       setMenuOpen(false);
     }
-  }, [running, isMobile]);
+  }, [isActive, isMobile]);
+
+  useEffect(() => {
+    if (phase !== 'countdown' || countdown === null) return;
+    if (countdown === 0) {
+      setCountdown(null);
+      setPhase('playing');
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setCountdown((value) => (value ?? 1) - 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [phase, countdown]);
 
   const toggleMenu = () => {
     if (!isMobile) return;
     setMenuOpen((value) => !value);
   };
 
-  const isMenuCollapsed = isMobile && running && !menuOpen;
+  const isMenuCollapsed = isMobile && isActive && !menuOpen;
 
   return (
     <div className="app">
       <Menu
-        running={running}
+        running={isActive}
         topic={topic}
         topics={QUIZ_TOPICS}
         onStart={handleStart}
@@ -83,10 +104,10 @@ export default function App() {
         onToggleCollapse={toggleMenu}
       />
       <main className="game-shell">
-        <StatusBar running={running} question={question} score={score} />
+        <StatusBar question={question} score={score} phase={phase} countdown={countdown} />
         <GameCanvas
           key={resetKey}
-          running={running}
+          phase={phase}
           question={question}
           onCorrect={onCorrect}
           onWrong={onWrong}
