@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import GameCanvas from './components/GameCanvas';
 import Menu from './components/Menu';
 import StatusBar from './components/StatusBar';
@@ -34,30 +34,30 @@ export default function App() {
     setResetKey((value) => value + 1);
   };
 
-  const menu = useMemo(
-    () => ({
-      running,
-      topic,
-      topics: QUIZ_TOPICS,
-      onStart: handleStart,
-      onReset: handleReset,
-      onTopicChange: setTopic
-    }),
-    [running, topic]
-  );
+  const handleGameOver = () => {
+    setRunning(false);
+    alert('GAME OVER');
+  };
 
   return (
     <div className="app">
-      <Menu {...menu} />
+      <Menu
+        running={running}
+        topic={topic}
+        topics={QUIZ_TOPICS}
+        onStart={handleStart}
+        onReset={handleReset}
+        onTopicChange={setTopic}
+      />
       <main className="game-shell">
-        <StatusBar question={question} score={score} />
+        <StatusBar running={running} question={question} score={score} />
         <GameCanvas
           key={resetKey}
           running={running}
           question={question}
           onCorrect={onCorrect}
           onWrong={onWrong}
-          onGameOver={() => setRunning(false)}
+          onGameOver={handleGameOver}
         />
       </main>
     </div>
