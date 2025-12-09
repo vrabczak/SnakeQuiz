@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import GameCanvas from './components/GameCanvas';
 import Menu from './components/Menu';
 import StatusBar from './components/StatusBar';
@@ -6,6 +6,7 @@ import { QuizQuestion } from './types';
 import { generateQuestion } from './quiz';
 
 const QUIZ_TOPICS = ['Multiplication'];
+const MOBILE_BREAKPOINT = 960;
 
 export default function App() {
   const [running, setRunning] = useState(false);
@@ -13,6 +14,8 @@ export default function App() {
   const [topic, setTopic] = useState(QUIZ_TOPICS[0]);
   const [question, setQuestion] = useState<QuizQuestion>(() => generateQuestion());
   const [resetKey, setResetKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(true);
 
   const onCorrect = () => {
     setScore((value) => value + 10);
@@ -32,12 +35,39 @@ export default function App() {
     setScore(0);
     setQuestion(generateQuestion());
     setResetKey((value) => value + 1);
+    if (isMobile) {
+      setMenuOpen(false);
+    }
   };
 
   const handleGameOver = () => {
     setRunning(false);
     alert('GAME OVER');
   };
+
+  useEffect(() => {
+    const updateIsMobile = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+    updateIsMobile();
+    window.addEventListener('resize', updateIsMobile);
+    return () => window.removeEventListener('resize', updateIsMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!running) {
+      setMenuOpen(true);
+      return;
+    }
+    if (isMobile) {
+      setMenuOpen(false);
+    }
+  }, [running, isMobile]);
+
+  const toggleMenu = () => {
+    if (!isMobile) return;
+    setMenuOpen((value) => !value);
+  };
+
+  const isMenuCollapsed = isMobile && running && !menuOpen;
 
   return (
     <div className="app">
@@ -48,6 +78,9 @@ export default function App() {
         onStart={handleStart}
         onReset={handleReset}
         onTopicChange={setTopic}
+        isMobile={isMobile}
+        collapsed={isMenuCollapsed}
+        onToggleCollapse={toggleMenu}
       />
       <main className="game-shell">
         <StatusBar running={running} question={question} score={score} />
