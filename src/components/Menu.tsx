@@ -1,5 +1,8 @@
 import type { KeyboardEvent } from 'react';
 
+/**
+ * Props controlling the game menu state and interactions.
+ */
 interface MenuProps {
   running: boolean;
   topic: string;
@@ -12,6 +15,19 @@ interface MenuProps {
   onToggleCollapse: () => void;
 }
 
+/**
+ * Side menu that starts or resets the game and allows topic selection.
+ * @param props.running Whether the game is currently active.
+ * @param props.topic Current quiz topic value.
+ * @param props.topics All available quiz topics.
+ * @param props.onStart Handler to begin a new game.
+ * @param props.onReset Handler to reset the existing game.
+ * @param props.onTopicChange Handler to update the selected topic.
+ * @param props.isMobile Whether the layout is in mobile mode.
+ * @param props.collapsed Whether the menu is collapsed on mobile.
+ * @param props.onToggleCollapse Handler to expand or collapse the menu on mobile.
+ * @returns Collapsible control panel with primary actions and topic selector.
+ */
 export default function Menu({
   running,
   topic,
