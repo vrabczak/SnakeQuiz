@@ -4,10 +4,17 @@ import App from './App';
 import './styles.css';
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  /**
+   * Registers the service worker after the window load event to enable offline play.
+   */
+  const registerServiceWorker = () => {
     navigator.serviceWorker.register('/SnakeQuiz/sw.js').catch((error) => {
       console.error('Service worker registration failed', error);
     });
+  };
+
+  window.addEventListener('load', () => {
+    registerServiceWorker();
   });
 }
 

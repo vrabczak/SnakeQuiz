@@ -1,5 +1,8 @@
 import { GamePhase, QuizQuestion } from '../types';
 
+/**
+ * Props displayed in the status bar above the playfield.
+ */
 interface StatusBarProps {
   question: QuizQuestion;
   score: number;
@@ -7,6 +10,14 @@ interface StatusBarProps {
   countdown: number | null;
 }
 
+/**
+ * Shows the current quiz prompt or countdown along with the player's score.
+ * @param props.question Current quiz data to present.
+ * @param props.score Player's accumulated points.
+ * @param props.phase Game lifecycle phase to decide messaging.
+ * @param props.countdown Remaining seconds before play begins, if applicable.
+ * @returns Status bar with question text and score values.
+ */
 export default function StatusBar({ question, score, phase, countdown }: StatusBarProps) {
   let prompt = '';
 

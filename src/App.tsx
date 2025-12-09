@@ -8,6 +8,10 @@ import { generateQuestion } from './quiz';
 const QUIZ_TOPICS = ['Multiplication'];
 const MOBILE_BREAKPOINT = 960;
 
+/**
+ * Root component that orchestrates game state, quiz logic, and responsive layout.
+ * @returns JSX for the Snake Quiz shell with menu, status bar, and game canvas.
+ */
 export default function App() {
   const [phase, setPhase] = useState<GamePhase>('idle');
   const [countdown, setCountdown] = useState<number | null>(null);
