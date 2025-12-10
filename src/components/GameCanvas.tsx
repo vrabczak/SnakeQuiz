@@ -40,7 +40,7 @@ export default function GameCanvas({ phase, stepMs, question, onCorrect, onWrong
     onGameOver
   });
   useKeyboardTurns(handleDirectionChange);
-  const { handlePointerDown, handlePointerMove } = useSwipeControls(handleImmediateDirectionChange);
+  const { handlePointerDown, handlePointerMove, resetGesture } = useSwipeControls(handleImmediateDirectionChange);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,6 +57,8 @@ export default function GameCanvas({ phase, stepMs, question, onCorrect, onWrong
         className="game-canvas"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
+        onPointerUp={resetGesture}
+        onPointerCancel={resetGesture}
         role="presentation"
       />
     </div>
