@@ -1,23 +1,30 @@
-import { QuizQuestion } from './types';
+import { QuizQuestion, QuizTopic } from './types';
 
-const MIN_FACTOR = 2;
-const MAX_FACTOR = 9;
 const OPTION_COUNT = 4;
-const MIN_PRODUCT = MIN_FACTOR * MIN_FACTOR;
-const MAX_PRODUCT = MAX_FACTOR * MAX_FACTOR;
 
-export function generateQuestion(previous?: QuizQuestion): QuizQuestion {
+export function generateQuestion(topic: QuizTopic, previous?: QuizQuestion): QuizQuestion {
+  const minFactor = topic.minFactor;
+  const maxFactor = topic.maxFactor;
+  const fixedFactor = topic.fixedFactor;
+  const minProduct = (fixedFactor ?? minFactor) * minFactor;
+  const maxProduct = (fixedFactor ?? maxFactor) * maxFactor;
+
   let next: QuizQuestion;
   do {
-    const a = randomBetween(MIN_FACTOR, MAX_FACTOR);
-    const b = randomBetween(MIN_FACTOR, MAX_FACTOR);
+    const variable = randomBetween(minFactor, maxFactor);
+    let a = fixedFactor ?? randomBetween(minFactor, maxFactor);
+    let b = variable;
+    if (fixedFactor && Math.random() < 0.5) {
+      a = variable;
+      b = fixedFactor;
+    }
     const correct = a * b;
     const options = new Set<number>();
     options.add(correct);
     while (options.size < OPTION_COUNT) {
       const offset = randomBetween(-5, 5);
       const candidate = correct + offset * randomBetween(1, 3);
-      if (candidate >= MIN_PRODUCT && candidate <= MAX_PRODUCT) {
+      if (candidate >= minProduct && candidate <= maxProduct) {
         options.add(candidate);
       }
     }

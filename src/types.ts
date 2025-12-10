@@ -11,4 +11,12 @@ export interface QuizQuestion {
   options: number[];
 }
 
+export interface QuizTopic {
+  id: string;
+  label: string;
+  minFactor: number;
+  maxFactor: number;
+  fixedFactor?: number;
+}
+
 export type GamePhase = 'idle' | 'countdown' | 'playing' | 'over';

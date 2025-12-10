@@ -2,11 +2,23 @@ import { useEffect, useState } from 'react';
 import GameCanvas from './components/GameCanvas';
 import Menu from './components/Menu';
 import StatusBar from './components/StatusBar';
-import { GamePhase, QuizQuestion } from './types';
+import { GamePhase, QuizQuestion, QuizTopic } from './types';
 import { generateQuestion } from './quiz';
 import { STEP_MS } from './game/config';
 
-const QUIZ_TOPICS = ['Multiplication'];
+const QUIZ_TOPICS: QuizTopic[] = [
+  { id: 'mixed', label: 'Multiplication 2–9', minFactor: 2, maxFactor: 9 },
+  ...Array.from({ length: 8 }, (_, index) => {
+    const factor = index + 2;
+    return {
+      id: `table-${factor}`,
+      label: `Multiplication of ${factor}`,
+      minFactor: 2,
+      maxFactor: 9,
+      fixedFactor: factor
+    };
+  })
+];
 const SPEED_OPTIONS = [
   { label: 'Very slow', value: 280 },
   { label: 'Slow', value: 230 },
@@ -24,18 +36,19 @@ export default function App() {
   const [phase, setPhase] = useState<GamePhase>('idle');
   const [countdown, setCountdown] = useState<number | null>(null);
   const [score, setScore] = useState(0);
-  const [topic, setTopic] = useState(QUIZ_TOPICS[0]);
+  const [topicId, setTopicId] = useState(QUIZ_TOPICS[0].id);
   const [speedMs, setSpeedMs] = useState(SPEED_OPTIONS[1].value);
-  const [question, setQuestion] = useState<QuizQuestion>(() => generateQuestion());
+  const [question, setQuestion] = useState<QuizQuestion>(() => generateQuestion(QUIZ_TOPICS[0]));
   const [resetKey, setResetKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(true);
   const isActive = phase === 'playing' || phase === 'countdown';
   const isPlaying = phase === 'playing';
+  const activeTopic = QUIZ_TOPICS.find((item) => item.id === topicId) ?? QUIZ_TOPICS[0];
 
   const onCorrect = () => {
     setScore((value) => value + 10);
-    setQuestion((previous) => generateQuestion(previous));
+    setQuestion((previous) => generateQuestion(activeTopic, previous));
   };
 
   const onWrong = () => {
@@ -43,7 +56,7 @@ export default function App() {
   };
 
   const handleStart = () => {
-    setQuestion((previous) => generateQuestion(previous));
+    setQuestion((previous) => generateQuestion(activeTopic, previous));
     setPhase('countdown');
     setCountdown(3);
     setResetKey((value) => value + 1);
@@ -51,13 +64,19 @@ export default function App() {
 
   const handleReset = () => {
     setScore(0);
-    setQuestion((previous) => generateQuestion(previous));
+    setQuestion((previous) => generateQuestion(activeTopic, previous));
     setPhase('countdown');
     setCountdown(3);
     setResetKey((value) => value + 1);
     if (isMobile) {
       setMenuOpen(false);
     }
+  };
+
+  const handleTopicChange = (value: string) => {
+    setTopicId(value);
+    const nextTopic = QUIZ_TOPICS.find((item) => item.id === value) ?? QUIZ_TOPICS[0];
+    setQuestion((previous) => generateQuestion(nextTopic, previous));
   };
 
   const handleGameOver = () => {
@@ -107,13 +126,13 @@ export default function App() {
     <div className="app">
       <Menu
         running={isActive}
-        topic={topic}
+        topicId={topicId}
         topics={QUIZ_TOPICS}
         speed={speedMs}
         speeds={SPEED_OPTIONS}
         onStart={handleStart}
         onReset={handleReset}
-        onTopicChange={setTopic}
+        onTopicChange={handleTopicChange}
         onSpeedChange={setSpeedMs}
         isMobile={isMobile}
         collapsed={isMenuCollapsed}

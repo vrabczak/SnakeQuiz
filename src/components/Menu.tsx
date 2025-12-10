@@ -1,17 +1,18 @@
 import type { KeyboardEvent } from 'react';
+import type { QuizTopic } from '../types';
 
 /**
  * Props controlling the game menu state and interactions.
  */
 interface MenuProps {
   running: boolean;
-  topic: string;
-  topics: string[];
+  topicId: string;
+  topics: QuizTopic[];
   speed: number;
   speeds: { label: string; value: number }[];
   onStart: () => void;
   onReset: () => void;
-  onTopicChange: (topic: string) => void;
+  onTopicChange: (topicId: string) => void;
   onSpeedChange: (speed: number) => void;
   isMobile: boolean;
   collapsed: boolean;
@@ -21,8 +22,8 @@ interface MenuProps {
 /**
  * Side menu that starts or resets the game and allows topic selection.
  * @param props.running Whether the game is currently active.
- * @param props.topic Current quiz topic value.
- * @param props.topics All available quiz topics.
+ * @param props.topicId Current quiz topic identifier.
+ * @param props.topics All available quiz topics with display labels.
  * @param props.speed Milliseconds per snake step.
  * @param props.speeds All available speed choices.
  * @param props.onStart Handler to begin a new game.
@@ -36,7 +37,7 @@ interface MenuProps {
  */
 export default function Menu({
   running,
-  topic,
+  topicId,
   topics,
   speed,
   speeds,
@@ -104,13 +105,13 @@ export default function Menu({
             <label className="menu-label" htmlFor="topic-select">Quiz topic</label>
             <select
               id="topic-select"
-              value={topic}
+              value={topicId}
               onChange={(event) => onTopicChange(event.target.value)}
               aria-label="Select quiz topic"
             >
               {topics.map((item) => (
-                <option key={item} value={item}>
-                  {item}
+                <option key={item.id} value={item.id}>
+                  {item.label}
                 </option>
               ))}
             </select>

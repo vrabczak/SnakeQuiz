@@ -1,24 +1,25 @@
 import { useEffect } from 'react';
+import { Direction } from '../types';
 
-type Turn = 'left' | 'right';
-
-/** Bind keyboard arrow keys to queue snake turns. */
-export function useKeyboardTurns(queueTurn: (turn: Turn) => void) {
+/** Bind keyboard arrow keys to set absolute map directions. */
+export function useKeyboardTurns(handleDirectionChange: (direction: Direction) => void) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      if (event.key.startsWith('Arrow')) {
         event.preventDefault();
       }
     };
     const onKeyUp = (event: KeyboardEvent) => {
-      const turnMap: Record<string, Turn> = {
+      const directionMap: Record<string, Direction> = {
+        ArrowUp: 'up',
+        ArrowDown: 'down',
         ArrowLeft: 'left',
         ArrowRight: 'right'
       };
-      const turn = turnMap[event.key];
-      if (turn) {
+      const direction = directionMap[event.key];
+      if (direction) {
         event.preventDefault();
-        queueTurn(turn);
+        handleDirectionChange(direction);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -27,5 +28,5 @@ export function useKeyboardTurns(queueTurn: (turn: Turn) => void) {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, [queueTurn]);
+  }, [handleDirectionChange]);
 }
