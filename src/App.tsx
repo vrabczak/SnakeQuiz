@@ -20,11 +20,11 @@ const QUIZ_TOPICS: QuizTopic[] = [
   })
 ];
 const SPEED_OPTIONS = [
-  { label: 'Very slow', value: 280 },
-  { label: 'Slow', value: 230 },
-  { label: 'Normal', value: STEP_MS },
-  { label: 'Fast', value: 120 },
-  { label: 'Very fast', value: 90 }
+  { label: 'Very slow', value: 350 },
+  { label: 'Slow', value: 300 },
+  { label: 'Normal', value: 250 },
+  { label: 'Fast', value: 200 },
+  { label: 'Very fast', value: 150 }
 ];
 const MOBILE_BREAKPOINT = 960;
 
