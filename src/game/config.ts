@@ -1,6 +1,6 @@
 /** Shared board geometry and timing configuration. */
 export const GRID_WIDTH = 30;
-export const GRID_HEIGHT = 30;
+export const GRID_HEIGHT = 20;
 export const CELL_SIZE = 26;
 export const LABEL_SIZE = 2;
 export const STEP_MS = 170;
