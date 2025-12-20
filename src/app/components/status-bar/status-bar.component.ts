@@ -4,18 +4,8 @@ import type { GamePhase, QuizQuestion } from '../../../types';
 @Component({
   standalone: true,
   selector: 'app-status-bar',
-  template: `
-    <section class="status-bar">
-      <div class="question" aria-live="polite">
-        <span class="label">Question</span>
-        <strong>{{ prompt }}</strong>
-      </div>
-      <div class="score" aria-live="polite">
-        <span class="label">Score</span>
-        <strong>{{ score }}</strong>
-      </div>
-    </section>
-  `
+  templateUrl: './status-bar.component.html',
+  styleUrls: ['./status-bar.component.css']
 })
 export class StatusBarComponent {
   @Input() question!: QuizQuestion;

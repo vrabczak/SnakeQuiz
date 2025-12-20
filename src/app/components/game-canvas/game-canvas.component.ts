@@ -22,19 +22,8 @@ import type { Direction, GamePhase, Point, QuizQuestion } from '../../../types';
 @Component({
   standalone: true,
   selector: 'app-game-canvas',
-  template: `
-    <div class="game-window" #wrapper>
-      <canvas
-        #canvas
-        class="game-canvas"
-        (pointerdown)="onPointerDown($event)"
-        (pointermove)="onPointerMove($event)"
-        (pointerup)="resetGesture()"
-        (pointercancel)="resetGesture()"
-        role="presentation"
-      ></canvas>
-    </div>
-  `
+  templateUrl: './game-canvas.component.html',
+  styleUrls: ['./game-canvas.component.css']
 })
 export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() phase: GamePhase = 'idle';
@@ -58,6 +47,8 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
   private directionQueue: Direction[] = [];
   private animationId: number | null = null;
   private resizeObserver?: ResizeObserver;
+  private resizeRafId: number | null = null;
+  private lastCanvasSize = { width: 0, height: 0 };
   private touchStart: Point | null = null;
   private hasTurned = false;
 
@@ -96,6 +87,10 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
   ngOnDestroy() {
     this.stopLoop();
     this.resizeObserver?.disconnect();
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -146,8 +141,18 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
   private observeResize() {
     const wrapper = this.wrapperRef?.nativeElement;
     if (!wrapper) return;
-    this.resizeObserver = new ResizeObserver(() => this.updateViewport());
+    this.resizeObserver = new ResizeObserver(() => this.scheduleViewportUpdate());
     this.resizeObserver.observe(wrapper);
+  }
+
+  private scheduleViewportUpdate() {
+    if (this.resizeRafId !== null) {
+      cancelAnimationFrame(this.resizeRafId);
+    }
+    this.resizeRafId = requestAnimationFrame(() => {
+      this.resizeRafId = null;
+      this.updateViewport();
+    });
   }
 
   private updateViewport() {
@@ -156,8 +161,10 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     if (!canvas || !wrapper) return;
     const width = wrapper.clientWidth || GRID_WIDTH * CELL_SIZE;
     const height = wrapper.clientHeight || GRID_HEIGHT * CELL_SIZE;
+    if (width === this.lastCanvasSize.width && height === this.lastCanvasSize.height) return;
     canvas.width = width;
     canvas.height = height;
+    this.lastCanvasSize = { width, height };
     this.visibleArea = {
       width: Math.min(Math.floor(width / CELL_SIZE), GRID_WIDTH),
       height: Math.min(Math.floor(height / CELL_SIZE), GRID_HEIGHT)

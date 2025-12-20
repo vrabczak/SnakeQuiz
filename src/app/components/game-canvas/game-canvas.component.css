@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  height: 100%;
+  flex: 1;
+}
+
+.game-window {
+  position: relative;
+  background: #09111c;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
+}
+
+.game-canvas { width: 100%; height: 100%; touch-action: none; display: block; }

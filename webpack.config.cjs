@@ -72,7 +72,22 @@ module.exports = (_, argv) => {
         },
         {
           test: /\.css$/i,
-          use: ['style-loader', 'css-loader']
+          oneOf: [
+            {
+              resourceQuery: /ngResource/,
+              use: [
+                {
+                  loader: 'css-loader',
+                  options: {
+                    exportType: 'string'
+                  }
+                }
+              ]
+            },
+            {
+              use: ['style-loader', 'css-loader']
+            }
+          ]
         }
       ]
     },

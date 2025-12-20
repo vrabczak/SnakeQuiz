@@ -35,41 +35,8 @@ const MOBILE_BREAKPOINT = 960;
   standalone: true,
   selector: 'app-root',
   imports: [CommonModule, MenuComponent, StatusBarComponent, GameCanvasComponent],
-  template: `
-    <div class="app">
-      <app-menu
-        [running]="isActive"
-        [topicId]="topicId"
-        [topics]="quizTopics"
-        [speed]="speedMs"
-        [speeds]="speedOptions"
-        [isMobile]="isMobile"
-        [collapsed]="isMobile && isActive && !menuOpen"
-        (start)="startGame()"
-        (reset)="resetGame()"
-        (topicChange)="changeTopic($event)"
-        (speedChange)="changeSpeed($event)"
-        (toggleCollapse)="toggleMenu()"
-      ></app-menu>
-      <main class="game-shell">
-        <app-status-bar
-          [question]="question"
-          [score]="score"
-          [phase]="phase"
-          [countdown]="countdown"
-        ></app-status-bar>
-        <app-game-canvas
-          [phase]="phase"
-          [stepMs]="speedMs"
-          [question]="question"
-          [runId]="runId"
-          (correct)="handleCorrect()"
-          (wrong)="handleWrong()"
-          (gameOver)="handleGameOver()"
-        ></app-game-canvas>
-      </main>
-    </div>
-  `
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
   quizTopics = QUIZ_TOPICS;

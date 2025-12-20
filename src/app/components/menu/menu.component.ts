@@ -6,78 +6,8 @@ import type { QuizTopic } from '../../../types';
   selector: 'app-menu',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <aside [class]="collapsed ? 'menu collapsed' : 'menu'">
-      <header
-        [class]="headerInteractive ? 'menu-header interactive' : 'menu-header'"
-        (click)="headerInteractive ? toggleCollapse.emit() : null"
-        (keydown)="onHeaderKeyDown($event)"
-        [attr.role]="headerInteractive ? 'button' : null"
-        [attr.tabindex]="headerInteractive ? 0 : null"
-        [attr.aria-expanded]="headerInteractive ? !collapsed : null"
-      >
-        <div>
-          <h1>Snake Quiz</h1>
-          <p class="subtitle">Grow by solving multiplication puzzles.</p>
-        </div>
-        <button
-          *ngIf="showToggle"
-          type="button"
-          class="menu-toggle"
-          (click)="toggleCollapse.emit()"
-          [attr.aria-expanded]="!collapsed"
-          [attr.aria-label]="collapsed ? 'Open menu' : 'Close menu'"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </header>
-      <div class="menu-body" [hidden]="collapsed">
-        <ul class="menu-list">
-          <li>
-            <button
-              class="primary"
-              type="button"
-              (click)="primaryAction.emit()"
-              [attr.aria-label]="running ? 'Reset game' : 'Start game'"
-            >
-              {{ primaryLabel }}
-            </button>
-          </li>
-          <li>
-            <label class="menu-label" for="topic-select">Quiz topic</label>
-            <select
-              id="topic-select"
-              [value]="topicId"
-              (change)="handleTopicChange($event)"
-              aria-label="Select quiz topic"
-            >
-              <option *ngFor="let item of topics" [value]="item.id">
-                {{ item.label }}
-              </option>
-            </select>
-          </li>
-          <li>
-            <label class="menu-label" for="speed-select">Snake speed</label>
-            <select
-              id="speed-select"
-              [value]="speed"
-              (change)="handleSpeedChange($event)"
-              aria-label="Select snake speed"
-            >
-              <option *ngFor="let option of speeds" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-          </li>
-        </ul>
-        <footer class="menu-footer">
-          <small>Optimized for tablets · Playable offline (PWA)</small>
-        </footer>
-      </div>
-    </aside>
-  `
+  templateUrl: './menu.component.html',
+  styleUrls: ['./menu.component.css']
 })
 export class MenuComponent {
   @Input() running = false;
