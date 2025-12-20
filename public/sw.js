@@ -1,8 +1,6 @@
-const CACHE = 'snake-quiz-cache-v2';
-const PRECACHE_ASSETS = [
-  '/SnakeQuiz/icon.svg',
-  '/SnakeQuiz/manifest.webmanifest'
-];
+const CACHE = 'snake-quiz-cache-v3';
+const BASE_PATH = new URL('.', self.registration.scope).pathname;
+const PRECACHE_ASSETS = [`${BASE_PATH}icon.svg`, `${BASE_PATH}manifest.webmanifest`];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -40,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(async () => {
           const cached = await caches.match(request);
-          return cached || caches.match('/SnakeQuiz/index.html');
+          return cached || caches.match(`${BASE_PATH}index.html`);
         })
     );
     return;
