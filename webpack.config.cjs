@@ -7,7 +7,11 @@ const { AngularWebpackPlugin } = require('@ngtools/webpack');
 
 module.exports = (_, argv) => {
   const isProd = argv.mode === 'production';
-  const publicPath = isProd ? '/SnakeQuiz/' : '/';
+  const rawPublicPath = (process.env.PUBLIC_PATH && process.env.PUBLIC_PATH.trim()) || '';
+  const normalizedPublicPath = rawPublicPath
+    ? rawPublicPath.endsWith('/') ? rawPublicPath : `${rawPublicPath}/`
+    : '';
+  const publicPath = normalizedPublicPath || (isProd ? '/SnakeQuiz/' : '/');
 
   return {
     entry: path.resolve(__dirname, 'src/main.ts'),
