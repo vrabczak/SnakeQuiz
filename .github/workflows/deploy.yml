@@ -30,15 +30,13 @@ jobs:
         run: npm ci
       
       - name: Build application
-        run: npm run build
-        env:
-          PUBLIC_PATH: /SnakeQuiz/  # Change if your repo name is different
+        run: npm run build -- --configuration production
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./dist/snake-quiz
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'

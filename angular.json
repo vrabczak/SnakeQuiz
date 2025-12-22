@@ -35,6 +35,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/SnakeQuiz/",
               "budgets": [
                 {
                   "type": "initial",
