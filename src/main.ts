@@ -1,7 +1,5 @@
-import 'zone.js';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import './styles.css';
 
 function registerServiceWorker() {
   const base = document.querySelector('base')?.getAttribute('href') ?? '/';

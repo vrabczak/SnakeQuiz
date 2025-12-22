@@ -22,14 +22,5 @@ export default [
     rules: {
       ...tsPlugin.configs.recommended.rules
     }
-  },
-  {
-    files: ['webpack.config.cjs'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'commonjs',
-      globals: globals.node
-    },
-    rules: {}
   }
 ];
