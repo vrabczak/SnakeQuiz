@@ -31,6 +31,9 @@ const SPEED_OPTIONS = [
 
 const MOBILE_BREAKPOINT = 960;
 
+/**
+ * Root component that coordinates quiz state, scoring, and UI layout.
+ */
 @Component({
   standalone: true,
   selector: 'app-root',
@@ -54,24 +57,39 @@ export class AppComponent implements OnInit, OnDestroy {
   private countdownTimer: number | null = null;
   private resizeHandler = () => this.updateIsMobile();
 
+  /**
+   * Whether the game is actively running or counting down.
+   */
   get isActive() {
     return this.phase === 'playing' || this.phase === 'countdown';
   }
 
+  /**
+   * Resolve the currently selected quiz topic.
+   */
   get activeTopic(): QuizTopic {
     return this.quizTopics.find((item) => item.id === this.topicId) ?? this.quizTopics[0];
   }
 
+  /**
+   * Initialize mobile detection and resize listener.
+   */
   ngOnInit() {
     this.updateIsMobile();
     window.addEventListener('resize', this.resizeHandler);
   }
 
+  /**
+   * Tear down listeners and timers.
+   */
   ngOnDestroy() {
     window.removeEventListener('resize', this.resizeHandler);
     this.clearCountdownTimer();
   }
 
+  /**
+   * Start a fresh run with a new question.
+   */
   startGame() {
     this.runId += 1;
     this.question = generateQuestion(this.activeTopic, this.question);
@@ -81,6 +99,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.syncMenuState();
   }
 
+  /**
+   * Reset score and restart with a new question.
+   */
   resetGame() {
     this.score = 0;
     this.runId += 1;
@@ -91,29 +112,47 @@ export class AppComponent implements OnInit, OnDestroy {
     this.syncMenuState();
   }
 
+  /**
+   * Update the active topic and refresh the current question.
+   */
   changeTopic(topicId: string) {
     this.topicId = topicId;
     this.question = generateQuestion(this.activeTopic, this.question);
   }
 
+  /**
+   * Update the game speed.
+   */
   changeSpeed(value: number) {
     this.speedMs = value;
   }
 
+  /**
+   * Toggle the menu on mobile devices.
+   */
   toggleMenu() {
     if (!this.isMobile) return;
     this.menuOpen = !this.menuOpen;
   }
 
+  /**
+   * Apply scoring and load the next question after a correct answer.
+   */
   handleCorrect() {
     this.score += 10;
     this.question = generateQuestion(this.activeTopic, this.question);
   }
 
+  /**
+   * Apply scoring penalty after a wrong answer.
+   */
   handleWrong() {
     this.score = Math.max(0, this.score - 5);
   }
 
+  /**
+   * End the game and surface the game-over state.
+   */
   handleGameOver() {
     this.phase = 'over';
     this.countdown = null;
@@ -121,10 +160,16 @@ export class AppComponent implements OnInit, OnDestroy {
     alert('GAME OVER');
   }
 
+  /**
+   * Placeholder for future countdown functionality.
+   */
   private scheduleCountdown() {
     // Countdown disabled; kept for future use.
   }
 
+  /**
+   * Stop any active countdown timer.
+   */
   private clearCountdownTimer() {
     if (this.countdownTimer !== null) {
       window.clearInterval(this.countdownTimer);
@@ -132,11 +177,17 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Track viewport size and update menu behavior.
+   */
   private updateIsMobile() {
     this.isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
     this.syncMenuState();
   }
 
+  /**
+   * Sync menu state based on game phase and viewport.
+   */
   private syncMenuState() {
     if (!this.isActive) {
       this.menuOpen = true;

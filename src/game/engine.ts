@@ -4,6 +4,9 @@ import { Label } from './types';
 import { randomBetween } from './utils';
 import type { Direction, Point, QuizQuestion } from '../types';
 
+/**
+ * Outcome information for a single game step.
+ */
 export type GameStepResult = {
   moved: boolean;
   gameOver?: boolean;
@@ -11,6 +14,9 @@ export type GameStepResult = {
   wrong?: boolean;
 };
 
+/**
+ * Core snake game engine that tracks state, movement, and quiz label collisions.
+ */
 export class SnakeGameEngine {
   snake: Point[] = [];
   labels: Label[] = [];
@@ -20,6 +26,9 @@ export class SnakeGameEngine {
   private direction: Direction = 'right';
   private directionQueue: Direction[] = [];
 
+  /**
+   * Reset engine state to defaults without spawning a new game.
+   */
   reset() {
     this.snake = [];
     this.labels = [];
@@ -29,6 +38,9 @@ export class SnakeGameEngine {
     this.lastTick = performance.now();
   }
 
+  /**
+   * Start a new run and seed the initial snake and labels.
+   */
   start(question?: QuizQuestion) {
     this.direction = 'right';
     this.directionQueue = [];
@@ -39,11 +51,17 @@ export class SnakeGameEngine {
     this.labels = this.createLabels(question, newSnake);
   }
 
+  /**
+   * Replace labels when the quiz question changes mid-run.
+   */
   syncQuestion(question?: QuizQuestion) {
     if (this.snake.length === 0) return;
     this.labels = this.createLabels(question, this.snake);
   }
 
+  /**
+   * Advance the game by one step if enough time has elapsed.
+   */
   step(timestamp: number, stepMs: number, question?: QuizQuestion): GameStepResult | null {
     if (timestamp - this.lastTick < stepMs) return null;
     this.lastTick = timestamp;
@@ -97,10 +115,16 @@ export class SnakeGameEngine {
     };
   }
 
+  /**
+   * Queue a direction change to be applied on the next step.
+   */
   setDirection(next: Direction) {
     this.enqueueDirection(next);
   }
 
+  /**
+   * Immediately switch direction, ignoring queued inputs.
+   */
   setImmediateDirection(next: Direction) {
     const opposite: Record<Direction, Direction> = {
       up: 'down',
@@ -113,6 +137,9 @@ export class SnakeGameEngine {
     this.direction = next;
   }
 
+  /**
+   * Place answer labels in free spaces, avoiding the snake body.
+   */
   private createLabels(question: QuizQuestion | undefined, currentSnake: Point[]): Label[] {
     const minX = 2;
     const maxX = GRID_WIDTH - 2 - LABEL_SIZE;
@@ -152,6 +179,9 @@ export class SnakeGameEngine {
     return options;
   }
 
+  /**
+   * Read the most recently queued direction, or the current one.
+   */
   private getPlannedDirection() {
     if (this.directionQueue.length) {
       return this.directionQueue[this.directionQueue.length - 1];
@@ -159,6 +189,9 @@ export class SnakeGameEngine {
     return this.direction;
   }
 
+  /**
+   * Queue a direction change while preventing instant reversals.
+   */
   private enqueueDirection(next: Direction) {
     const opposite: Record<Direction, Direction> = {
       up: 'down',

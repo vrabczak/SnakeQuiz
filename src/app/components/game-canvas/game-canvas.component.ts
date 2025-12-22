@@ -17,6 +17,9 @@ import { SnakeGameEngine } from '../../../game/engine';
 import { renderGame } from '../../../game/rendering';
 import type { Direction, GamePhase, Point, QuizQuestion } from '../../../types';
 
+/**
+ * Canvas-based renderer and controller for the snake game.
+ */
 @Component({
   standalone: true,
   selector: 'app-game-canvas',
@@ -47,6 +50,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
 
   constructor(private zone: NgZone) {}
 
+  /**
+   * React to phase, run, or question changes.
+   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['phase']) {
       const currentPhase = changes['phase'].currentValue as GamePhase;
@@ -71,12 +77,18 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     }
   }
 
+  /**
+   * Initialize canvas size, observers, and the animation loop.
+   */
   ngAfterViewInit() {
     this.updateViewport();
     this.observeResize();
     this.startLoop();
   }
 
+  /**
+   * Clean up animation resources.
+   */
   ngOnDestroy() {
     this.stopLoop();
     this.resizeObserver?.disconnect();
@@ -87,6 +99,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
   @HostListener('window:keydown', ['$event'])
+  /**
+   * Prevent page scroll when arrow keys are pressed.
+   */
   onKeyDown(event: KeyboardEvent) {
     if (event.key.startsWith('Arrow')) {
       event.preventDefault();
@@ -94,6 +109,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
   @HostListener('window:keyup', ['$event'])
+  /**
+   * Map arrow keys to movement directions.
+   */
   onKeyUp(event: KeyboardEvent) {
     const directionMap: Record<string, Direction> = {
       ArrowUp: 'up',
@@ -108,11 +126,17 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     }
   }
 
+  /**
+   * Track initial touch position for swipe handling.
+   */
   onPointerDown(event: PointerEvent) {
     this.touchStart = { x: event.clientX, y: event.clientY };
     this.hasTurned = false;
   }
 
+  /**
+   * Detect swipe direction and immediately turn the snake.
+   */
   onPointerMove(event: PointerEvent) {
     if (!this.touchStart || this.hasTurned) return;
     const dx = event.clientX - this.touchStart.x;
@@ -126,11 +150,17 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     this.hasTurned = true;
   }
 
+  /**
+   * Clear touch tracking state after a pointer interaction.
+   */
   resetGesture() {
     this.touchStart = null;
     this.hasTurned = false;
   }
 
+  /**
+   * Observe wrapper size changes to resize the canvas.
+   */
   private observeResize() {
     const wrapper = this.wrapperRef?.nativeElement;
     if (!wrapper) return;
@@ -138,6 +168,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     this.resizeObserver.observe(wrapper);
   }
 
+  /**
+   * Debounce resize updates to the next animation frame.
+   */
   private scheduleViewportUpdate() {
     if (this.resizeRafId !== null) {
       cancelAnimationFrame(this.resizeRafId);
@@ -148,6 +181,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     });
   }
 
+  /**
+   * Resize the canvas and recompute the visible grid area.
+   */
   private updateViewport() {
     const canvas = this.canvasRef?.nativeElement;
     const wrapper = this.wrapperRef?.nativeElement;
@@ -165,6 +201,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     this.render();
   }
 
+  /**
+   * Start the animation loop outside Angular change detection.
+   */
   private startLoop() {
     this.zone.runOutsideAngular(() => {
       const loop = (timestamp: number) => {
@@ -175,6 +214,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     });
   }
 
+  /**
+   * Stop the animation loop.
+   */
   private stopLoop() {
     if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId);
@@ -182,24 +224,39 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     }
   }
 
+  /**
+   * Reset the engine and repaint the canvas.
+   */
   private resetGameState() {
     this.engine.reset();
     this.render();
   }
 
+  /**
+   * Start a new engine run and repaint.
+   */
   private startGame() {
     this.engine.start(this.question);
     this.render();
   }
 
+  /**
+   * Queue a direction change for the next step.
+   */
   private handleDirectionChange(next: Direction) {
     this.engine.setDirection(next);
   }
 
+  /**
+   * Immediately apply a direction change.
+   */
   private handleImmediateDirectionChange(next: Direction) {
     this.engine.setImmediateDirection(next);
   }
 
+  /**
+   * Advance the engine, handle events, and redraw.
+   */
   private step(timestamp: number) {
     if (this.phase !== 'playing') return;
     const result = this.engine.step(timestamp, this.stepMs, this.question);
@@ -218,6 +275,9 @@ export class GameCanvasComponent implements AfterViewInit, OnDestroy, OnChanges 
     }
   }
 
+  /**
+   * Render the current game state to the canvas.
+   */
   private render() {
     const canvas = this.canvasRef?.nativeElement;
     if (!canvas) return;

@@ -1,6 +1,9 @@
 import { Component, Input } from '@angular/core';
 import type { GamePhase, QuizQuestion } from '../../../types';
 
+/**
+ * Status bar that displays the current prompt and game state.
+ */
 @Component({
   standalone: true,
   selector: 'app-status-bar',
@@ -13,6 +16,9 @@ export class StatusBarComponent {
   @Input() phase: GamePhase = 'idle';
   @Input() countdown: number | null = null;
 
+  /**
+   * Resolve the message shown in the status bar.
+   */
   get prompt() {
     if (this.phase === 'countdown' && this.countdown !== null) {
       return `Starting in ${this.countdown}...`;
