@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/app.component.css"],
-  "sourcesContent": [".app {\n  display: grid;\n  grid-template-columns: 320px 1fr;\n  min-height: 100vh;\n  height: 100vh;\n  background: radial-gradient(circle at 20% 20%, rgba(14, 203, 129, 0.12), transparent 35%),\n    radial-gradient(circle at 80% 30%, rgba(118, 142, 255, 0.12), transparent 40%),\n    #0b1726;\n}\n\n.game-shell {\n  display: flex;\n  flex-direction: column;\n  min-height: 100vh;\n  height: 100vh;\n}\n\n@media (max-width: 960px) {\n  .app {\n    grid-template-columns: 1fr;\n    grid-template-rows: auto 1fr;\n    min-height: 100dvh;\n    height: 100dvh;\n    display: flex;\n    flex-direction: column;\n  }\n\n  .game-shell {\n    flex: 1;\n    min-height: 0;\n    height: auto;\n  }\n}\n"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,yBAAuB,MAAM;AAC7B,cAAY;AACZ,UAAQ;AACR;AAAA,IAAY;AAAA,MAAgB,OAAO,GAAG,IAAI,GAAG;AAAA,MAAE,KAAK,EAAE,EAAE,GAAG,EAAE,GAAG,EAAE,KAAK;AAAA,MAAE,YAAY,IAAI;AAAA,IACvF;AAAA,MAAgB,OAAO,GAAG,IAAI,GAAG;AAAA,MAAE,KAAK,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,KAAK;AAAA,MAAE,YAAY,IAAI;AAAA,IAC9E;AACJ;AAEA,CAAC;AACC,WAAS;AACT,kBAAgB;AAChB,cAAY;AACZ,UAAQ;AACV;AAEA,QAAO,WAAY;AACjB,GAlBD;AAmBG,2BAAuB;AACvB,wBAAoB,KAAK;AACzB,gBAAY;AACZ,YAAQ;AACR,aAAS;AACT,oBAAgB;AAClB;AAEA,GAjBD;AAkBG,UAAM;AACN,gBAAY;AACZ,YAAQ;AACV;AACF;",
-  "names": []
-}
