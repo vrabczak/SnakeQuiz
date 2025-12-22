@@ -30,6 +30,10 @@ const SPEED_OPTIONS = [
 ];
 
 const MOBILE_BREAKPOINT = 960;
+const BASE_POINTS = 10;
+const SPEED_BONUS_STEP = 2;
+const SPEED_STEP_MS = 50;
+const NORMAL_SPEED_MS = 250;
 
 /**
  * Root component that coordinates quiz state, scoring, and UI layout.
@@ -139,7 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * Apply scoring and load the next question after a correct answer.
    */
   handleCorrect() {
-    this.score += 10;
+    this.score += this.pointsForSpeed(this.speedMs);
     this.question = generateQuestion(this.activeTopic, this.question);
   }
 
@@ -196,5 +200,13 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.isMobile) {
       this.menuOpen = false;
     }
+  }
+
+  /**
+   * Compute points for a correct answer, rewarding faster speeds only.
+   */
+  private pointsForSpeed(speedMs: number) {
+    const stepsFaster = Math.max(0, Math.round((NORMAL_SPEED_MS - speedMs) / SPEED_STEP_MS));
+    return BASE_POINTS + stepsFaster * SPEED_BONUS_STEP;
   }
 }

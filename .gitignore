@@ -1,6 +1,7 @@
 .vscode
 node_modules
 .DS_Store
+.angular
 dist
 .env
 npm-debug.log*

@@ -33,4 +33,13 @@ describe('AppComponent', () => {
     expect(component.phase).toBe('playing');
     expect(component.menuOpen).toBe(false);
   });
+
+  it('rewards faster speeds with more points', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const component = fixture.componentInstance;
+    component.score = 0;
+    component.speedMs = 150;
+    component.handleCorrect();
+    expect(component.score).toBe(14);
+  });
 });
