@@ -1,34 +1,139 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Snake Quiz icon">
-  <defs>
-    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0b1726" />
-      <stop offset="100%" stop-color="#0e2c44" />
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 128 128"
+   role="img"
+   aria-label="Snake Quiz icon"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="icon.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview8"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="6.3046875"
+     inkscape:cx="64"
+     inkscape:cy="64"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8" />
+  <defs
+     id="defs5">
+    <linearGradient
+       id="bg"
+       x1="0"
+       x2="0"
+       y1="0"
+       y2="1">
+      <stop
+         offset="0%"
+         stop-color="#0b1726"
+         id="stop1" />
+      <stop
+         offset="100%"
+         stop-color="#0e2c44"
+         id="stop2" />
     </linearGradient>
-    <linearGradient id="snake" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0ecb81" />
-      <stop offset="100%" stop-color="#0fb774" />
+    <linearGradient
+       id="snake"
+       x1="26.053687"
+       x2="102.00859"
+       y1="8.780114"
+       y2="84.735014"
+       gradientTransform="scale(0.87488592,1.1430062)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#0ecb81"
+         id="stop3" />
+      <stop
+         offset="100%"
+         stop-color="#0fb774"
+         id="stop4" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="1.6" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
+    <filter
+       id="glow"
+       x="-0.21037704"
+       y="-0.14714125"
+       width="1.4207528"
+       height="1.2937809">
+      <feGaussianBlur
+         stdDeviation="1.6"
+         result="blur"
+         id="feGaussianBlur4" />
+      <feMerge
+         id="feMerge5">
+        <feMergeNode
+           in="blur"
+           id="feMergeNode4" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode5" />
       </feMerge>
     </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter1"
+       x="-0.068991584"
+       y="-0.068991584"
+       width="1.1379832"
+       height="1.1379832">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.45994389"
+         id="feGaussianBlur1" />
+    </filter>
   </defs>
-  <rect width="128" height="128" rx="18" fill="url(#bg)" />
+  <rect
+     width="128"
+     height="128"
+     rx="18"
+     fill="url(#bg)"
+     id="rect5" />
   <path
-    d="M88 30C72 18 42 24 42 48c0 16 14 18 26 22c18 6 18 28-4 32c-14 2-24-6-24-16"
-    fill="none"
-    stroke="url(#snake)"
-    stroke-width="12"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    filter="url(#glow)"
-  />
-  <circle cx="88" cy="30" r="8" fill="#0ecb81" />
-  <circle cx="90.5" cy="28" r="2.5" fill="#0b1726" />
-  <circle cx="46" cy="106" r="8" fill="url(#snake)" />
-  <rect x="44" y="88" width="12" height="8" rx="3" fill="#fff" opacity="0.8" />
-  <rect x="72" y="54" width="12" height="8" rx="3" fill="#fff" opacity="0.8" />
+     d="M 79.405101,32.358712 C 79.659606,10.562207 32.14031,18.261347 32.637699,48.620714 c 0.534058,32.597534 33.699639,7.244011 32.939555,38.391929"
+     fill="none"
+     stroke="url(#snake)"
+     stroke-width="12"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     filter="url(#glow)"
+     id="path5"
+     style="display:inline;stroke:url(#snake);stroke-opacity:1;fill:none;fill-opacity:1"
+     transform="matrix(-1.1699509,0,0,1.39199,129.44629,-12.508948)"
+     inkscape:transform-center-x="-0.35429298"
+     inkscape:transform-center-y="0.035664294"
+     sodipodi:nodetypes="csc" />
+  <circle
+     cx="52.62949"
+     cy="114.38166"
+     r="8"
+     fill="#0ecb81"
+     id="circle5"
+     style="filter:url(#filter1);fill:#0ecb81;fill-opacity:1" />
+  <circle
+     cx="48.626396"
+     cy="117.14002"
+     r="2.5"
+     fill="#0b1726"
+     id="circle6" />
+  <circle
+     cx="56.14312"
+     cy="117.24474"
+     r="2.5"
+     fill="#0b1726"
+     id="circle6-0" />
 </svg>
